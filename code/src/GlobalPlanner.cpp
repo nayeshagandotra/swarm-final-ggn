@@ -12,7 +12,7 @@
 
 // Constructor
 GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap, int largemap_xsize, int largemap_ysize)
-    : num_agents_(num_agents), large_gridmap_(large_gridmap) {}
+    : num_agents_(num_agents), large_gridmap_(large_gridmap), largemap_xsize_(largemap_xsize), largemap_ysize_(largemap_ysize) {}
 
 // Destructor
 GlobalPlanner::~GlobalPlanner() {}
@@ -39,19 +39,29 @@ struct BlockComparator {
     }
 };
 
-std::vector<Block&> GlobalPlanner::getSuccessors(Block& p) {
-        std::vector<Block&> successors;
-        int x = p.x;
-        int y = p.y;
+// Function to get successors of a block in a 4-connected grid
+std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(Block& p) {
+    std::vector<std::shared_ptr<Block>> successors;
 
-        GETMAPINDEX()
-        // Check the four possible directions and add valid neighbors
-        successors.push_back(large_gridmap_[x - 1][y]); // Up
-        successors.push_back(large_gridmap_[x + 1][y]); // Down
-        successors.push_back(large_gridmap_[x][y - 1]); // Left
-        successors.push_back(large_gridmap_[x][y + 1]); // Right
+    // Define the 4 possible movement directions: up, down, left, right
+    std::vector<std::pair<int, int>> directions = {
+        {0, 1},  // Right
+        {1, 0},  // Down
+        {0, -1}, // Left
+        {-1, 0}  // Up
+    };
 
-        return successors;
+    // Loop through each direction
+    for (const auto& [dx, dy] : directions) {
+        int newX = p.x + dx;
+        int newY = p.y + dy;
+
+        // Check if the new position is within bounds
+        if (newX >= 0 && newX < largemap_xsize_ && newY >= 0 && newY < largemap_ysize_) {
+            successors.push_back(large_gridmap_[GETMAPINDEX(newX, newY, largemap_xsize_, largemap_ysize_)]);
+        }
+    }
+    return successors;
 }
 
 // Method to plan a path using a basic A* algorithm
@@ -71,10 +81,8 @@ std::vector<std::pair<int, int>> GlobalPlanner::planPath(Block& start, Block& go
         open.pop();
 
         for (const auto& successor : getSuccessors(current)) {
-            int newX = current.first + direction.first;
-            int newY = current.second + direction.second;
 
-            if (isFree(newX, newY) && !visited[newX][newY]) {
+            if (isFree(successor) && !successor->closed_astar) {
                 queue.push({newX, newY});
                 visited[newX][newY] = true;
                 parent[newX][newY] = current;
