@@ -9,6 +9,10 @@ include_directories(include)
 add_executable(run_test
         src/planner.cpp
         src/runtest.cpp)
+        
+add_executable(load_map
+	src/load_map.cpp)
+	
 # Have the executable depend on the header files.
 target_include_directories(run_test PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
