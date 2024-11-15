@@ -20,6 +20,9 @@
 struct Block {
     int x;        // X-coordinate of the block
     int y;        // Y-coordinate of the block
+    int f;
+    int g;
+    int h;
     int obsCost;  // Obstacle cost for the block
     int* subMap;  // Submap representing the block
     int size;     // Size of the block (swarm size)

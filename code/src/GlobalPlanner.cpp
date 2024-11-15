@@ -8,6 +8,7 @@
 #include <limits>
 #include <thread>
 #include <unordered_map>
+#include "load_map.h"
 
 // Constructor
 GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap)
@@ -17,19 +18,34 @@ GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_
 GlobalPlanner::~GlobalPlanner() {}
 
 // Method to check if a cell is within bounds and free
-def ifFree()
+bool isFree(Block& p){
+    if (p.obsCost > 0){
+        return false;
+    }
+    return true;
+}
+
+int euclidean(Block& p1, Block& p2){
+    return sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
+}
+
+int manhattan(Block& p1, Block& p2){
+    return abs((p1.x - p2.x)) + abs((p1.y - p2.y));
+}
+
+struct BlockComparator {
+    bool operator()(const Block* s1, const Block* s2) const {
+        return (s1->g + s1->h) > (s2->g + s2->h);  // min heap
+    }
+};
 
 // Method to plan a path using a basic A* algorithm
 std::vector<std::pair<int, int>> GlobalPlanner::planPath(Block& start, Block& goal) {
-    if (!isFree(start.x, start.y) || !isFree(goal.x, goal.y)) {
-        throw std::runtime_error("Start or goal position is invalid");
-    }
 
-    std::vector<std::pair<int, int>> path;
-    std::queue<std::pair<int, int>> queue;
-
-    queue.push(start);
-    visited[start.first][start.second] = true;
+    std::priority_queue<Block*, std::vector<Block*>, BlockComparator> open;
+    start.g = 0;
+    start.h = manhattan(start, goal);
+    open.push(start);
 
     // Directions for moving in 4-connected grid (up, down, left, right)
     std::vector<std::pair<int, int>> directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};

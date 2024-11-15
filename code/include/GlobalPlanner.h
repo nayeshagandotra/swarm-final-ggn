@@ -13,7 +13,7 @@ public:
     ~GlobalPlanner();
 
     // Method to plan a path from start to goal
-    std::vector<std::pair<int, int>> planPath(const std::pair<int, int>& start, const std::pair<int, int>& goal);
+    std::vector<std::pair<int, int>> planPath(Block& start, Block& goal);
 
 private:
     int num_agents_;         // Number of agents

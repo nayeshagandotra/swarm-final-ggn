@@ -2,7 +2,7 @@
 
 // Constructor implementation for Block
 Block::Block(int size, int x, int y, int obsCost, int* subMap)
-    : size(size), x(x), y(y), obsCost(obsCost), subMap(subMap) {}
+    : size(size), x(x), y(y), f(10000), g(1000000), h(0), obsCost(obsCost), subMap(subMap) {}
 
 // Function implementation for makeCoarseGraph
 std::unordered_map<int, std::shared_ptr<Block>> makeCoarseGraph(
