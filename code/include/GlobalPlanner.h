@@ -13,8 +13,8 @@ public:
     ~GlobalPlanner();
 
     // Method to plan a path from start to goal
-    std::vector<std::shared_ptr<Block>> getSuccessors(Block& p);
-    std::vector<std::pair<int, int>> planPath(Block& start, Block& goal);
+    std::vector<std::shared_ptr<Block>> getSuccessors(std::shared_ptr<Block> p);
+    std::vector<std::pair<int, int>> planPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal);
 
 
 private:

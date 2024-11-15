@@ -27,6 +27,7 @@ struct Block {
     int obsCost;  // Obstacle cost for the block
     int* subMap;  // Submap representing the block
     int size;     // Size of the block (swarm size)
+    std::shared_ptr<Block> parent = nullptr;
 
     // Constructor
     Block(int size, int x, int y, int obsCost, int* subMap);

@@ -25,22 +25,22 @@ bool isFree(Block& p){
     return true;
 }
 
-int euclidean(Block& p1, Block& p2){
-    return sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
+int euclidean(std::shared_ptr<Block> p1, std::shared_ptr<Block> p2){
+    return sqrt((p1->x - p2->x)*(p1->x - p2->x) + (p1->y - p2->y)*(p1->y - p2->y));
 }
 
-int manhattan(Block& p1, Block& p2){
-    return abs((p1.x - p2.x)) + abs((p1.y - p2.y));
+int manhattan(std::shared_ptr<Block> p1, std::shared_ptr<Block> p2){
+    return abs((p1->x - p2->x)) + abs((p1->y - p2->y));
 }
 
 struct BlockComparator {
-    bool operator()(const Block& s1, const Block& s2) const {
-        return (s1.g + s1.h) > (s2.g + s2.h);  // min heap
+    bool operator()(const std::shared_ptr<Block> s1, const std::shared_ptr<Block> s2) const {
+        return (s1->g + s1->h) > (s2->g + s2->h);  // min heap
     }
 };
 
 // Function to get successors of a block in a 4-connected grid
-std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(Block& p) {
+std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(std::shared_ptr<Block> p) {
     std::vector<std::shared_ptr<Block>> successors;
 
     // Define the 4 possible movement directions: up, down, left, right
@@ -53,8 +53,8 @@ std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(Block& p) {
 
     // Loop through each direction
     for (const auto& [dx, dy] : directions) {
-        int newX = p.x + dx;
-        int newY = p.y + dy;
+        int newX = p->x + dx;
+        int newY = p->y + dy;
 
         // Check if the new position is within bounds
         if (newX >= 0 && newX < largemap_xsize_ && newY >= 0 && newY < largemap_ysize_) {
@@ -65,31 +65,28 @@ std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(Block& p) {
 }
 
 // Method to plan a path using a basic A* algorithm
-std::vector<std::pair<int, int>> GlobalPlanner::planPath(Block& start, Block& goal) {
+std::vector<std::pair<int, int>> GlobalPlanner::planPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal) {
 
-    std::priority_queue<Block&, std::vector<Block&>, BlockComparator> open;
-    start.g = 0;
-    start.h = manhattan(start, goal);
+    std::priority_queue<std::shared_ptr<Block>, std::vector<std::shared_ptr<Block>>, BlockComparator> open;
+    start->g = 0;
+    start->h = manhattan(start, goal);
     open.push(start);
 
     bool found = false;
 
     // BFS for finding the path
-    while (!open.empty() && !found) {
+    while (!open.empty() && !goal->closed_astar) {
         auto current = open.top();
-        current.closed_astar = true;
+        current->closed_astar = true;
         open.pop();
 
         for (const auto& successor : getSuccessors(current)) {
 
             if (isFree(successor) && !successor->closed_astar) {
-                queue.push({newX, newY});
-                visited[newX][newY] = true;
-                parent[newX][newY] = current;
-
-                if (newX == goal.first && newY == goal.second) {
-                    found = true;
-                    break;
+                if (successor->g > current->g + successor->obsCost){
+                    successor-> g = current->g + successor->obsCost;
+                    successor->parent = current;
+                    open.push(successor);
                 }
             }
         }
