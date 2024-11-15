@@ -23,6 +23,7 @@ struct Block {
     int f;
     int g;
     int h;
+    bool closed_astar = false;
     int obsCost;  // Obstacle cost for the block
     int* subMap;  // Submap representing the block
     int size;     // Size of the block (swarm size)

@@ -11,7 +11,7 @@
 #include "load_map.h"
 
 // Constructor
-GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap)
+GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap, int largemap_xsize, int largemap_ysize)
     : num_agents_(num_agents), large_gridmap_(large_gridmap) {}
 
 // Destructor
@@ -34,30 +34,43 @@ int manhattan(Block& p1, Block& p2){
 }
 
 struct BlockComparator {
-    bool operator()(const Block* s1, const Block* s2) const {
-        return (s1->g + s1->h) > (s2->g + s2->h);  // min heap
+    bool operator()(const Block& s1, const Block& s2) const {
+        return (s1.g + s1.h) > (s2.g + s2.h);  // min heap
     }
 };
+
+std::vector<Block&> GlobalPlanner::getSuccessors(Block& p) {
+        std::vector<Block&> successors;
+        int x = p.x;
+        int y = p.y;
+
+        GETMAPINDEX()
+        // Check the four possible directions and add valid neighbors
+        successors.push_back(large_gridmap_[x - 1][y]); // Up
+        successors.push_back(large_gridmap_[x + 1][y]); // Down
+        successors.push_back(large_gridmap_[x][y - 1]); // Left
+        successors.push_back(large_gridmap_[x][y + 1]); // Right
+
+        return successors;
+}
 
 // Method to plan a path using a basic A* algorithm
 std::vector<std::pair<int, int>> GlobalPlanner::planPath(Block& start, Block& goal) {
 
-    std::priority_queue<Block*, std::vector<Block*>, BlockComparator> open;
+    std::priority_queue<Block&, std::vector<Block&>, BlockComparator> open;
     start.g = 0;
     start.h = manhattan(start, goal);
     open.push(start);
 
-    // Directions for moving in 4-connected grid (up, down, left, right)
-    std::vector<std::pair<int, int>> directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
-
     bool found = false;
 
     // BFS for finding the path
-    while (!queue.empty() && !found) {
-        auto current = queue.front();
-        queue.pop();
+    while (!open.empty() && !found) {
+        auto current = open.top();
+        current.closed_astar = true;
+        open.pop();
 
-        for (const auto& direction : directions) {
+        for (const auto& successor : getSuccessors(current)) {
             int newX = current.first + direction.first;
             int newY = current.second + direction.second;
 

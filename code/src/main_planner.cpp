@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_map>
 #define MAPS_DIR "maps"
+#include "load_map.h"
 
 
 
