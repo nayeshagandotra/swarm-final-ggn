@@ -64,6 +64,20 @@ std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(std::shared_ptr
     return successors;
 }
 
+
+std::vector<std::pair<int, int>> reconstructPath(std::pair<int, int> start, std::pair<int, int> goal, const std::vector<std::vector<std::pair<int, int>>>& parent) {
+    std::vector<std::pair<int, int>> path;
+    std::pair<int, int> step = goal;
+    while (step != start) {
+        path.push_back(step);
+        step = parent[step.first][step.second];
+    }
+    path.push_back(start);
+    std::reverse(path.begin(), path.end());
+    return path;
+    }
+
+
 // Method to plan a path using a basic A* algorithm
 std::vector<std::pair<int, int>> GlobalPlanner::planPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal) {
 
@@ -91,16 +105,27 @@ std::vector<std::pair<int, int>> GlobalPlanner::planPath(std::shared_ptr<Block> 
             }
         }
     }
+    std::vector<std::pair<int, int>> path;
+
+
+
+    // if (found) {
+    //     // Reconstruct the path from goal to start
+    //     std::pair<int, int> step = goal;
+    //     while (step != start) {
+    //         path.push_back(step);
+    //         step = parent[step.first][step.second];
+    //     }
+    //     path.push_back(start);
+    //     std::reverse(path.begin(), path.end());
+    // }
+
+    
+
 
     if (found) {
         // Reconstruct the path from goal to start
-        std::pair<int, int> step = goal;
-        while (step != start) {
-            path.push_back(step);
-            step = parent[step.first][step.second];
-        }
-        path.push_back(start);
-        std::reverse(path.begin(), path.end());
+        // reconstructPath(start, goal, parent);
     }
 
     return path;
