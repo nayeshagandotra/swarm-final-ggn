@@ -65,14 +65,29 @@ std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(std::shared_ptr
 }
 
 
-std::vector<std::pair<int, int>> reconstructPath(std::pair<int, int> start, std::pair<int, int> goal, const std::vector<std::vector<std::pair<int, int>>>& parent) {
+// std::vector<std::pair<int, int>> reconstructPath(std::pair<int, int> start, std::pair<int, int> goal, const std::vector<std::vector<std::pair<int, int>>>& parent) {
+//     std::vector<std::pair<int, int>> path;
+//     std::pair<int, int> step = goal;
+//     while (step != start) {
+//         path.push_back(step);
+//         step = parent[step.first][step.second];
+//     }
+//     path.push_back(start);
+//     std::reverse(path.begin(), path.end());
+//     return path;
+//     }
+
+std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal) {
     std::vector<std::pair<int, int>> path;
-    std::pair<int, int> step = goal;
-    while (step != start) {
+    // std::pair<int, int> step = goal;
+    std::shared_ptr<Block> next = goal;
+    std::pair<int, int> step = {goal->x, goal->y};
+    while (step != std::make_pair(start->x, start->y)) {
         path.push_back(step);
-        step = parent[step.first][step.second];
+        next = next->parent;
+        step = std::make_pair(next->x, next->y);
     }
-    path.push_back(start);
+    path.push_back(std::make_pair(start->x, start->y));
     std::reverse(path.begin(), path.end());
     return path;
     }
