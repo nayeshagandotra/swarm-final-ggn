@@ -8,50 +8,73 @@
 #define MAPS_DIR "maps"
 #include "load_map.h"
 
+#include "../include/main_planner.h"
+#include <math.h>
 
+#if !defined(MAX)
+#define	MAX(A, B)	((A) > (B) ? (A) : (B))
+#endif
 
-int main(int argc, char *argv[])
+#if !defined(MIN)
+#define	MIN(A, B)	((A) < (B) ? (A) : (B))
+#endif
+
+#define NUMOFDIRS 8
+
+void planner(
+    int* map,
+    int collision_thresh,
+    int x_size,
+    int y_size,
+    int robotposeX,
+    int robotposeY,
+    int target_steps,
+    int* target_traj,
+    int targetposeX,
+    int targetposeY,
+    int curr_time,
+    int* action_ptr
+    )
 {
-
-    std::string mapDirPath = MAPS_DIR;
-    std::string mapFilePath = mapDirPath + "/" + argv[1];
-    std::cout << "Reading problem definition from: " << mapFilePath << std::endl;
-    int swarm_size = std::stoi(argv[2]);
-    std::ifstream myfile;
-    myfile.open(mapFilePath);
-    if (!myfile.is_open()) {
-        std::cout << "Failed to open the file:" << mapFilePath << std::endl;
-        return -1;
-    }
-    // read map size
-    char letter;
-    std::string line;
-    int x_size, y_size;
-
-    myfile >> letter;
-    if (letter != 'N')
-    {
-        std::cout << "error parsing file" << std::endl;
-        return -1;
-    }
+    // 8-connected grid
+    int dX[NUMOFDIRS] = {-1, -1, -1,  0,  0,  1, 1, 1};
+    int dY[NUMOFDIRS] = {-1,  0,  1, -1,  1, -1, 0, 1};
     
-    myfile >> y_size >> letter >> x_size;
-    std:: cout << "map size: " << x_size << letter << y_size << std::endl;
-    // read map
-    int* map = new int[x_size*y_size];
-    for (size_t i=0; i<x_size; i++)
-    {
-        std::getline(myfile, line);
-        std::stringstream ss(line);
-        for (size_t j=0; j<y_size; j++)
-        {
-            double value;
-            ss >> value;
+    // for now greedily move towards the final target position,
+    // but this is where you can put your planner
 
-            map[j*x_size+i] = (int) value;
-            if (j != x_size-1) ss.ignore();
+    int goalposeX = target_traj[target_steps-1];
+    int goalposeY = target_traj[target_steps-1+target_steps];
+    // printf("robot: %d %d;\n", robotposeX, robotposeY);
+    // printf("goal: %d %d;\n", goalposeX, goalposeY);
+
+    int bestX = 0, bestY = 0; // robot will not move if greedy action leads to collision
+    double olddisttotarget = (double)sqrt(((robotposeX-goalposeX)*(robotposeX-goalposeX) + (robotposeY-goalposeY)*(robotposeY-goalposeY)));
+    double disttotarget;
+    for(int dir = 0; dir < NUMOFDIRS; dir++)
+    {
+        int newx = robotposeX + dX[dir];
+        int newy = robotposeY + dY[dir];
+
+        if (newx >= 1 && newx <= x_size && newy >= 1 && newy <= y_size)
+        {
+            if ((map[GETMAPINDEX(newx,newy,x_size,y_size)] >= 0) && (map[GETMAPINDEX(newx,newy,x_size,y_size)] < collision_thresh))  //if free
+            {
+                disttotarget = (double)sqrt(((newx-goalposeX)*(newx-goalposeX) + (newy-goalposeY)*(newy-goalposeY)));
+                if(disttotarget < olddisttotarget)
+                {
+                    olddisttotarget = disttotarget;
+                    bestX = dX[dir];
+                    bestY = dY[dir];
+                }
+            }
         }
     }
-    std::unordered_map<int,std::shared_ptr<Block>> c_map = makeCoarseGraph(map, x_size, y_size, swarm_size); 
-
+    robotposeX = robotposeX + bestX;
+    robotposeY = robotposeY + bestY;
+    action_ptr[0] = robotposeX;
+    action_ptr[1] = robotposeY;
+    
+    return;
 }
+

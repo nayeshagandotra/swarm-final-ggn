@@ -1,6 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/run_test.dir/src/planner.cpp.o"
-  "CMakeFiles/run_test.dir/src/planner.cpp.o.d"
   "CMakeFiles/run_test.dir/src/runtest.cpp.o"
   "CMakeFiles/run_test.dir/src/runtest.cpp.o.d"
   "run_test"

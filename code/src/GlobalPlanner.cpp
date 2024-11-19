@@ -11,18 +11,21 @@
 #include "load_map.h"
 
 // Constructor
-GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap, int largemap_xsize, int largemap_ysize)
-    : num_agents_(num_agents), large_gridmap_(large_gridmap), largemap_xsize_(largemap_xsize), largemap_ysize_(largemap_ysize) {}
+GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap, 
+                             int largemap_xsize, int largemap_ysize)
+    : num_agents_(num_agents), large_gridmap_(large_gridmap), largemap_xsize_(largemap_xsize), 
+    largemap_ysize_(largemap_ysize) {}
 
 // Destructor
 GlobalPlanner::~GlobalPlanner() {}
 
 // Method to check if a cell is within bounds and free
-bool isFree(Block& p){
-    if (p.obsCost > 0){
-        return false;
-    }
-    return true;
+bool GlobalPlanner::isFree(std::shared_ptr<Block> p) const {
+    // if (p->obsCost > 0){
+    //     return false;
+    // }
+    // return true;
+    return true; //imagine an empty map for now
 }
 
 int euclidean(std::shared_ptr<Block> p1, std::shared_ptr<Block> p2){
@@ -64,22 +67,10 @@ std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(std::shared_ptr
     return successors;
 }
 
-
-// std::vector<std::pair<int, int>> reconstructPath(std::pair<int, int> start, std::pair<int, int> goal, const std::vector<std::vector<std::pair<int, int>>>& parent) {
-//     std::vector<std::pair<int, int>> path;
-//     std::pair<int, int> step = goal;
-//     while (step != start) {
-//         path.push_back(step);
-//         step = parent[step.first][step.second];
-//     }
-//     path.push_back(start);
-//     std::reverse(path.begin(), path.end());
-//     return path;
-//     }
-
 std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal) {
+    // returns the sequence of x and y positions the swarm should take
+
     std::vector<std::pair<int, int>> path;
-    // std::pair<int, int> step = goal;
     std::shared_ptr<Block> next = goal;
     std::pair<int, int> step = {goal->x, goal->y};
     while (step != std::make_pair(start->x, start->y)) {
@@ -90,7 +81,7 @@ std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Block> start, s
     path.push_back(std::make_pair(start->x, start->y));
     std::reverse(path.begin(), path.end());
     return path;
-    }
+}
 
 
 // Method to plan a path using a basic A* algorithm
@@ -109,39 +100,21 @@ std::vector<std::pair<int, int>> GlobalPlanner::planPath(std::shared_ptr<Block> 
         current->closed_astar = true;
         open.pop();
 
+        // successors is a vector of blocks
         for (const auto& successor : getSuccessors(current)) {
 
             if (isFree(successor) && !successor->closed_astar) {
                 if (successor->g > current->g + successor->obsCost){
-                    successor-> g = current->g + successor->obsCost;
+                    successor->g = current->g + successor->obsCost;
                     successor->parent = current;
                     open.push(successor);
                 }
             }
         }
     }
-    std::vector<std::pair<int, int>> path;
 
-
-
-    // if (found) {
-    //     // Reconstruct the path from goal to start
-    //     std::pair<int, int> step = goal;
-    //     while (step != start) {
-    //         path.push_back(step);
-    //         step = parent[step.first][step.second];
-    //     }
-    //     path.push_back(start);
-    //     std::reverse(path.begin(), path.end());
-    // }
-
-    
-
-
-    if (found) {
-        // Reconstruct the path from goal to start
-        // reconstructPath(start, goal, parent);
-    }
+    // now reconstruct (backtrack)
+    std::vector<std::pair<int, int>> path = reconstructPath(start, goal);
 
     return path;
 }

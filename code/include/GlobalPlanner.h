@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <unordered_map>
+#include "load_map.h"
 
 class GlobalPlanner {
 public:
@@ -19,7 +20,6 @@ public:
 
 private:
     int num_agents_;         // Number of agents
-    int* large_gridmap_;      // Pointer to a grid map
     int largemap_xsize_;
     int largemap_ysize_;
     std::unordered_map<int,std::shared_ptr<Block>> large_gridmap_; // 2D grid for obstacles
