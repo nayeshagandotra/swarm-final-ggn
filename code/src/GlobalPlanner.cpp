@@ -55,9 +55,9 @@ std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(std::shared_ptr
     };
 
     // Loop through each direction
-    for (const auto& [dx, dy] : directions) {
-        int newX = p->x + dx;
-        int newY = p->y + dy;
+    for (const auto& pairdx : directions) {
+        int newX = p->x + pairdx.first;
+        int newY = p->y + pairdx.second;
 
         // Check if the new position is within bounds
         if (newX >= 0 && newX < largemap_xsize_ && newY >= 0 && newY < largemap_ysize_) {
