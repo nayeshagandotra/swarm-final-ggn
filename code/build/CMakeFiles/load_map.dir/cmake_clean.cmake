@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/load_map.dir/src/load_map.cpp.o"
   "CMakeFiles/load_map.dir/src/load_map.cpp.o.d"
-  "load_map"
-  "load_map.pdb"
+  "libload_map.a"
+  "libload_map.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

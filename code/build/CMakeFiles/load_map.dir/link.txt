@@ -1,1 +1,2 @@
-/usr/bin/c++ -g -rdynamic CMakeFiles/load_map.dir/src/load_map.cpp.o -o load_map 
+/Library/Developer/CommandLineTools/usr/bin/ar qc libload_map.a CMakeFiles/load_map.dir/src/load_map.cpp.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libload_map.a

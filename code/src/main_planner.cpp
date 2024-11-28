@@ -6,52 +6,58 @@
 #include <memory>
 #include <unordered_map>
 #define MAPS_DIR "maps"
-#include "load_map.h"
+#include "../include/MapMakerFine.h"
+#include "../include/GlobalPlanner.h"
+#include "../include/main_planner.h"
+#include <math.h>
 
 
+#if !defined(MAX)
+#define	MAX(A, B)	((A) > (B) ? (A) : (B))
+#endif
 
-int main(int argc, char *argv[])
+#if !defined(MIN)
+#define	MIN(A, B)	((A) < (B) ? (A) : (B))
+#endif
+
+#define NUMOFDIRS 8
+
+void planner(
+    int* map,
+    int x_size,
+    int y_size
+    )
+{
+    
+    return;
+}
+
+void cost_maker(
+    int* map,
+    int x_size,
+    int y_size,
+    int swarm_size,
+    int goal_index
+    )
 {
 
-    std::string mapDirPath = MAPS_DIR;
-    std::string mapFilePath = mapDirPath + "/" + argv[1];
-    std::cout << "Reading problem definition from: " << mapFilePath << std::endl;
-    int swarm_size = std::stoi(argv[2]);
-    std::ifstream myfile;
-    myfile.open(mapFilePath);
-    if (!myfile.is_open()) {
-        std::cout << "Failed to open the file:" << mapFilePath << std::endl;
-        return -1;
-    }
-    // read map size
-    char letter;
-    std::string line;
-    int x_size, y_size;
+    // Create vector of shared_ptr Nodes
+    auto nodemap = make_node_map(map, x_size, y_size);
 
-    myfile >> letter;
-    if (letter != 'N')
-    {
-        std::cout << "error parsing file" << std::endl;
-        return -1;
-    }
-    
-    myfile >> y_size >> letter >> x_size;
-    std:: cout << "map size: " << x_size << letter << y_size << std::endl;
-    // read map
-    int* map = new int[x_size*y_size];
-    for (size_t i=0; i<x_size; i++)
-    {
-        std::getline(myfile, line);
-        std::stringstream ss(line);
-        for (size_t j=0; j<y_size; j++)
-        {
-            double value;
-            ss >> value;
+    // create the GlobalPlanner instance
+    GlobalPlanner planner(swarm_size, nodemap, x_size, y_size);
 
-            map[j*x_size+i] = (int) value;
-            if (j != x_size-1) ss.ignore();
-        }
-    }
-    std::unordered_map<int,std::shared_ptr<Block>> c_map = makeCoarseGraph(map, x_size, y_size, swarm_size); 
+    // run a backward dijkstra search with distance as cost to get d heur
+    planner.distBWDijkstra(nodemap[goal_index]);
 
+    // run a second bw dj search with obscost
+    planner.calculateRectSum();
+
+    // print nodemap (distance only, change to loop through)
+    print_node_map(nodemap, x_size, y_size, "node_map_costs.txt", "h", 1);
+
+
+   
+    return;
 }
+

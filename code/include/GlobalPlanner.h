@@ -1,31 +1,39 @@
+// globalplanner.h
 #ifndef GLOBALPLANNER_H
 #define GLOBALPLANNER_H
 
+#include "../include/MapMakerFine.h"
+#include <queue>
 #include <vector>
-#include <utility>
-#include <unordered_map>
+#include <cmath>
+#include <algorithm>
 
 class GlobalPlanner {
 public:
-    // GlobalPlanner::GlobalPlanner(int width, int height) 
-    // : width_(width), height_(height), grid_(width, std::vector<bool>(height, true)) {}
-    GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap, int largemap_xsize, int largemap_ysize);
+    // Constructor and destructor
+    GlobalPlanner(int num_agents, NodeMap nodemap, int x_size, int y_size);
     ~GlobalPlanner();
 
-    // Method to plan a path from start to goal
-    std::vector<std::shared_ptr<Block>> getSuccessors(std::shared_ptr<Block> p);
-    std::vector<std::pair<int, int>> planPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal);
-
-
+    // Planning methods
+    void distBWDijkstra(std::shared_ptr<Node> goal);
+    void calculateRectSum();
+    
 private:
-    int num_agents_;         // Number of agents
-    int* large_gridmap_;      // Pointer to a grid map
-    int largemap_xsize_;
-    int largemap_ysize_;
-    std::unordered_map<int,std::shared_ptr<Block>> large_gridmap_; // 2D grid for obstacles
+    int swarm_size_;
+    NodeMap nodemap_;
+    int x_size_;
+    int y_size_;
 
-    // Helper function to check if a cell is within bounds and free
-    bool isFree(std::shared_ptr<Block> p) const;
+    // Helper methods
+    bool isFree(std::shared_ptr<Node> p) const;
+    std::vector<std::shared_ptr<Node>> getSuccessors(std::shared_ptr<Node> p);
 };
 
-#endif // GLOBALPLANNER_H
+// Helper functions
+int euclidean(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2);
+int manhattan(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2);
+std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Node> start, 
+                                                std::shared_ptr<Node> goal,
+                                                const NodeMap& nodemap);
+
+#endif
