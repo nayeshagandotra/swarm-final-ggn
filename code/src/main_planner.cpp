@@ -6,10 +6,11 @@
 #include <memory>
 #include <unordered_map>
 #define MAPS_DIR "maps"
-#include "load_map.h"
-
+#include "../include/MapMakerFine.h"
+#include "../include/GlobalPlanner.h"
 #include "../include/main_planner.h"
 #include <math.h>
+
 
 #if !defined(MAX)
 #define	MAX(A, B)	((A) > (B) ? (A) : (B))
@@ -23,58 +24,40 @@
 
 void planner(
     int* map,
-    int collision_thresh,
     int x_size,
-    int y_size,
-    int robotposeX,
-    int robotposeY,
-    int target_steps,
-    int* target_traj,
-    int targetposeX,
-    int targetposeY,
-    int curr_time,
-    int* action_ptr
+    int y_size
     )
 {
-    // 8-connected grid
-    int dX[NUMOFDIRS] = {-1, -1, -1,  0,  0,  1, 1, 1};
-    int dY[NUMOFDIRS] = {-1,  0,  1, -1,  1, -1, 0, 1};
     
-    // for now greedily move towards the final target position,
-    // but this is where you can put your planner
+    return;
+}
 
-    int goalposeX = target_traj[target_steps-1];
-    int goalposeY = target_traj[target_steps-1+target_steps];
-    // printf("robot: %d %d;\n", robotposeX, robotposeY);
-    // printf("goal: %d %d;\n", goalposeX, goalposeY);
+void cost_maker(
+    int* map,
+    int x_size,
+    int y_size,
+    int swarm_size,
+    int goal_index
+    )
+{
 
-    int bestX = 0, bestY = 0; // robot will not move if greedy action leads to collision
-    double olddisttotarget = (double)sqrt(((robotposeX-goalposeX)*(robotposeX-goalposeX) + (robotposeY-goalposeY)*(robotposeY-goalposeY)));
-    double disttotarget;
-    for(int dir = 0; dir < NUMOFDIRS; dir++)
-    {
-        int newx = robotposeX + dX[dir];
-        int newy = robotposeY + dY[dir];
+    // Create vector of shared_ptr Nodes
+    auto nodemap = make_node_map(map, x_size, y_size);
 
-        if (newx >= 1 && newx <= x_size && newy >= 1 && newy <= y_size)
-        {
-            if ((map[GETMAPINDEX(newx,newy,x_size,y_size)] >= 0) && (map[GETMAPINDEX(newx,newy,x_size,y_size)] < collision_thresh))  //if free
-            {
-                disttotarget = (double)sqrt(((newx-goalposeX)*(newx-goalposeX) + (newy-goalposeY)*(newy-goalposeY)));
-                if(disttotarget < olddisttotarget)
-                {
-                    olddisttotarget = disttotarget;
-                    bestX = dX[dir];
-                    bestY = dY[dir];
-                }
-            }
-        }
-    }
-    robotposeX = robotposeX + bestX;
-    robotposeY = robotposeY + bestY;
-    action_ptr[0] = robotposeX;
-    action_ptr[1] = robotposeY;
-    
+    // create the GlobalPlanner instance
+    GlobalPlanner planner(swarm_size, nodemap, x_size, y_size);
+
+    // run a backward dijkstra search with distance as cost to get d heur
+    planner.distBWDijkstra(nodemap[goal_index]);
+
+    // run a second bw dj search with obscost
+    planner.calculateRectSum();
+
+    // print nodemap (distance only, change to loop through)
+    print_node_map(nodemap, x_size, y_size, "node_map_costs.txt", "h", 1);
+
+
+   
     return;
 }
 

@@ -130,6 +130,19 @@ load_map/fast:
 .PHONY : load_map/fast
 
 #=============================================================================
+# Target rules for targets named MapMakerFine
+
+# Build rule for target.
+MapMakerFine: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 MapMakerFine
+.PHONY : MapMakerFine
+
+# fast build rule for target.
+MapMakerFine/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapMakerFine.dir/build.make CMakeFiles/MapMakerFine.dir/build
+.PHONY : MapMakerFine/fast
+
+#=============================================================================
 # Target rules for targets named GlobalPlanner
 
 # Build rule for target.
@@ -191,6 +204,30 @@ src/GlobalPlanner.s: src/GlobalPlanner.cpp.s
 src/GlobalPlanner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/GlobalPlanner.dir/build.make CMakeFiles/GlobalPlanner.dir/src/GlobalPlanner.cpp.s
 .PHONY : src/GlobalPlanner.cpp.s
+
+src/MapMakerFine.o: src/MapMakerFine.cpp.o
+.PHONY : src/MapMakerFine.o
+
+# target to build an object file
+src/MapMakerFine.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapMakerFine.dir/build.make CMakeFiles/MapMakerFine.dir/src/MapMakerFine.cpp.o
+.PHONY : src/MapMakerFine.cpp.o
+
+src/MapMakerFine.i: src/MapMakerFine.cpp.i
+.PHONY : src/MapMakerFine.i
+
+# target to preprocess a source file
+src/MapMakerFine.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapMakerFine.dir/build.make CMakeFiles/MapMakerFine.dir/src/MapMakerFine.cpp.i
+.PHONY : src/MapMakerFine.cpp.i
+
+src/MapMakerFine.s: src/MapMakerFine.cpp.s
+.PHONY : src/MapMakerFine.s
+
+# target to generate assembly for a file
+src/MapMakerFine.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapMakerFine.dir/build.make CMakeFiles/MapMakerFine.dir/src/MapMakerFine.cpp.s
+.PHONY : src/MapMakerFine.cpp.s
 
 src/load_map.o: src/load_map.cpp.o
 .PHONY : src/load_map.o
@@ -273,12 +310,16 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... GlobalPlanner"
+	@echo "... MapMakerFine"
 	@echo "... load_map"
 	@echo "... main_planner"
 	@echo "... run_test"
 	@echo "... src/GlobalPlanner.o"
 	@echo "... src/GlobalPlanner.i"
 	@echo "... src/GlobalPlanner.s"
+	@echo "... src/MapMakerFine.o"
+	@echo "... src/MapMakerFine.i"
+	@echo "... src/MapMakerFine.s"
 	@echo "... src/load_map.o"
 	@echo "... src/load_map.i"
 	@echo "... src/load_map.s"

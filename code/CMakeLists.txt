@@ -12,8 +12,13 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 include_directories(include)
 
 # Add libraries
+# Add libraries
 add_library(load_map 
     src/load_map.cpp
+)
+
+add_library(MapMakerFine 
+    src/MapMakerFine.cpp
 )
 
 add_library(GlobalPlanner 
@@ -31,7 +36,7 @@ target_include_directories(main_planner
 
 # Link dependencies to main_planner library
 target_link_libraries(main_planner 
-    PRIVATE load_map 
+    PRIVATE MapMakerFine 
     PRIVATE GlobalPlanner
 )
 
@@ -57,7 +62,7 @@ target_include_directories(run_test
 # Link run_test with main_planner and its dependencies
 target_link_libraries(run_test 
     PRIVATE main_planner
-    PRIVATE load_map
+    PRIVATE MapMakerFine
     PRIVATE GlobalPlanner
 )
 

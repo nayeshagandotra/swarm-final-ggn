@@ -4,17 +4,16 @@
 // Declare the plan function
 void planner(
     int* map,
-    int collision_thresh,
+    int x_size,
+    int y_size
+    );
+
+void cost_maker(
+    int* map,
     int x_size,
     int y_size,
-    int robotposeX,
-    int robotposeY,
-    int target_steps,
-    int* target_traj,
-    int targetposeX,
-    int targetposeY,
-    int curr_time,
-    int* action_ptr
+    int swarm_size,
+    int goal_index
     );
 
 #endif // PLANNER_H

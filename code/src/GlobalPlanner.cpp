@@ -1,120 +1,130 @@
+// globalplanner.cpp
 #include "../include/GlobalPlanner.h"
-#include <math.h>
-#include <vector>
-#include <queue>
-#include <chrono>
-#include <iostream>  // For std::cout
-#include <fstream>
-#include <limits>
-#include <thread>
-#include <unordered_map>
-#include "load_map.h"
+#define COLLISION_THRESH 0.5
 
-// Constructor
-GlobalPlanner::GlobalPlanner(int num_agents, std::unordered_map<int,std::shared_ptr<Block>> large_gridmap, 
-                             int largemap_xsize, int largemap_ysize)
-    : num_agents_(num_agents), large_gridmap_(large_gridmap), largemap_xsize_(largemap_xsize), 
-    largemap_ysize_(largemap_ysize) {}
+GlobalPlanner::GlobalPlanner(int num_agents, NodeMap nodemap, 
+                           int x_size, int y_size)
+    : swarm_size_(num_agents), nodemap_(nodemap), x_size_(x_size), 
+    y_size_(y_size) {}
 
-// Destructor
 GlobalPlanner::~GlobalPlanner() {}
 
-// Method to check if a cell is within bounds and free
-bool GlobalPlanner::isFree(std::shared_ptr<Block> p) const {
-    // if (p->obsCost > 0){
-    //     return false;
-    // }
-    // return true;
-    return true; //imagine an empty map for now
+bool GlobalPlanner::isFree(std::shared_ptr<Node> p) const {
+    return p->mapvalue < COLLISION_THRESH;
 }
 
-int euclidean(std::shared_ptr<Block> p1, std::shared_ptr<Block> p2){
-    return sqrt((p1->x - p2->x)*(p1->x - p2->x) + (p1->y - p2->y)*(p1->y - p2->y));
+int euclidean(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2) {
+    return sqrt((p1->x - p2->x)*(p1->x - p2->x) + 
+                (p1->y - p2->y)*(p1->y - p2->y));
 }
 
-int manhattan(std::shared_ptr<Block> p1, std::shared_ptr<Block> p2){
+int manhattan(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2) {
     return abs((p1->x - p2->x)) + abs((p1->y - p2->y));
 }
 
-struct BlockComparator {
-    bool operator()(const std::shared_ptr<Block> s1, const std::shared_ptr<Block> s2) const {
-        return (s1->g + s1->h) > (s2->g + s2->h);  // min heap
+struct NodeComparator {
+    NodeComparator(int n) : n_(n) {}
+    
+    bool operator()(const std::shared_ptr<Node> s1, 
+                   const std::shared_ptr<Node> s2) const {
+        return (s1->h[n_]) > (s2->h[n_]);
     }
+    int n_;
 };
 
-// Function to get successors of a block in a 4-connected grid
-std::vector<std::shared_ptr<Block>> GlobalPlanner::getSuccessors(std::shared_ptr<Block> p) {
-    std::vector<std::shared_ptr<Block>> successors;
-
-    // Define the 4 possible movement directions: up, down, left, right
+std::vector<std::shared_ptr<Node>> GlobalPlanner::getSuccessors(std::shared_ptr<Node> p) {
+    std::vector<std::shared_ptr<Node>> successors;
     std::vector<std::pair<int, int>> directions = {
-        {0, 1},  // Right
-        {1, 0},  // Down
-        {0, -1}, // Left
-        {-1, 0}  // Up
+    {0, 1},   // Right
+    {1, 1},   // Down-Right
+    {1, 0},   // Down
+    {1, -1},  // Down-Left
+    {0, -1},  // Left
+    {-1, -1}, // Up-Left
+    {-1, 0},  // Up
+    {-1, 1}   // Up-Right
     };
 
-    // Loop through each direction
-    for (const auto& pairdx : directions) {
-        int newX = p->x + pairdx.first;
-        int newY = p->y + pairdx.second;
+    for (const auto& dir : directions) {
+        int newX = p->x + dir.first;
+        int newY = p->y + dir.second;
 
-        // Check if the new position is within bounds
-        if (newX >= 0 && newX < largemap_xsize_ && newY >= 0 && newY < largemap_ysize_) {
-            successors.push_back(large_gridmap_[GETMAPINDEX(newX, newY, largemap_xsize_, largemap_ysize_)]);
+        if (newX >= 0 && newX < x_size_ && newY >= 0 && newY < y_size_) {
+            successors.push_back(nodemap_[newY * x_size_ + newX]);
         }
     }
     return successors;
 }
 
-std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal) {
-    // returns the sequence of x and y positions the swarm should take
-
+std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Node> start, 
+                                                std::shared_ptr<Node> goal) {
     std::vector<std::pair<int, int>> path;
-    std::shared_ptr<Block> next = goal;
-    std::pair<int, int> step = {goal->x, goal->y};
-    while (step != std::make_pair(start->x, start->y)) {
-        path.push_back(step);
-        next = next->parent;
-        step = std::make_pair(next->x, next->y);
+    auto current = goal;
+    
+    while (current != start) {
+        path.push_back({current->x, current->y});
+        current = current->parent;  // Direct pointer access
     }
-    path.push_back(std::make_pair(start->x, start->y));
+    path.push_back({start->x, start->y});
     std::reverse(path.begin(), path.end());
     return path;
 }
 
+void GlobalPlanner::distBWDijkstra(std::shared_ptr<Node> goal) {
+    // pq for open, based on desired h value
+    std::priority_queue<std::shared_ptr<Node>,
+                   std::vector<std::shared_ptr<Node>>,
+                   NodeComparator> open(NodeComparator(0));  // Use h[0] for comparison
+    
+    goal->h[0] = 0;
+    open.push(goal);
 
-// Method to plan a path using a basic A* algorithm
-std::vector<std::pair<int, int>> GlobalPlanner::planPath(std::shared_ptr<Block> start, std::shared_ptr<Block> goal) {
-
-    std::priority_queue<std::shared_ptr<Block>, std::vector<std::shared_ptr<Block>>, BlockComparator> open;
-    start->g = 0;
-    start->h = manhattan(start, goal);
-    open.push(start);
-
-    bool found = false;
-
-    // BFS for finding the path
-    while (!open.empty() && !goal->closed_astar) {
+    while (!open.empty()) {
         auto current = open.top();
-        current->closed_astar = true;
+        current->closed_dj[0] = true;
         open.pop();
 
-        // successors is a vector of blocks
         for (const auto& successor : getSuccessors(current)) {
-
-            if (isFree(successor) && !successor->closed_astar) {
-                if (successor->g > current->g + successor->obsCost){
-                    successor->g = current->g + successor->obsCost;
-                    successor->parent = current;
+            if (isFree(successor) && !successor->closed_dj[0]) {
+                int new_g = current->h[0] + 1;    //assume cost = 1 for each movement
+                if (successor->h[0] > new_g) {
+                    successor->h[0] = new_g;
                     open.push(successor);
                 }
             }
         }
     }
+    return;
+}
 
-    // now reconstruct (backtrack)
-    std::vector<std::pair<int, int>> path = reconstructPath(start, goal);
-
-    return path;
+void GlobalPlanner::calculateRectSum() {
+    float out_of_bounds_value = x_size_ * y_size_;
+    int rect_width = swarm_size_;
+    int rect_height = swarm_size_/2 + 1;
+    
+    for (int y = 0; y < y_size_; y++) {
+        for (int x = 0; x < x_size_; x++) {
+            auto current = nodemap_[GETMAPINDEX(x+1, y+1, x_size_, y_size_)];
+            float sum = 0;
+            
+            // Calculate bounds for the rectangle
+            int x_start = x - rect_width/2;
+            int x_end = x + rect_width/2;
+            int y_start = y - rect_height/2;
+            int y_end = y + rect_height/2;
+            
+            // Sum all mapvalues within the rectangle
+            for (int sy = y_start; sy <= y_end; sy++) {
+                for (int sx = x_start; sx <= x_end; sx++) {
+                    if (sx >= 0 && sx < x_size_ && sy >= 0 && sy < y_size_) {
+                        sum += nodemap_[GETMAPINDEX(sx+1, sy+1, x_size_, y_size_)]->mapvalue;
+                    } else {
+                        sum += out_of_bounds_value;
+                    }
+                }
+            }
+            
+            current->h[1] = sum;
+        }
+    }
 }

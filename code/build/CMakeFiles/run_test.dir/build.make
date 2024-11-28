@@ -93,7 +93,7 @@ run_test_EXTERNAL_OBJECTS =
 run_test: CMakeFiles/run_test.dir/src/runtest.cpp.o
 run_test: CMakeFiles/run_test.dir/build.make
 run_test: libmain_planner.a
-run_test: libload_map.a
+run_test: libMapMakerFine.a
 run_test: libGlobalPlanner.a
 run_test: CMakeFiles/run_test.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/nayeshagandotra/Desktop/swarm-final-ggn/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable run_test"
