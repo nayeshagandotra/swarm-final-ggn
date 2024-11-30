@@ -85,7 +85,7 @@ if __name__ == "__main__":
     x_size, y_size, costmap, positions = parse_mapfile(sys.argv[1])
 
     # Define boundaries and colormap
-    boundaries = np.arange(0, 70, 1)
+    boundaries = np.arange(0, 1, 0.1)
     colors = plt.cm.plasma(np.linspace(0, 1, len(boundaries) - 1))
     cmap = mcolors.ListedColormap(colors)
     norm = mcolors.BoundaryNorm(boundaries, cmap.N, clip=True)
