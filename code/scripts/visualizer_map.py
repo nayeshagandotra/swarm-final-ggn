@@ -4,50 +4,95 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.colors as mcolors
 import sys
 
+# def parse_mapfile(filename):
+#     with open(filename, 'r') as file:
+#         # Read map size and costmap
+#         assert file.readline().strip() == 'N', "Expected 'N' in the first line"
+#         x_size, y_size = map(int, file.readline().strip().split(','))
+        
+#         costmap = []
+#         for line in file:
+#             if line.strip() == 'M':
+#                 break
+#             # Split by comma and filter out empty strings
+#             values = [x for x in line.strip().split(',') if x]
+#             row = list(map(float, values))
+#             costmap.append(row)
+        
+#         # Read all S and G positions
+#         positions = []
+#         while True:
+#             # Read start positions
+#             line = file.readline().strip()
+#             if not line:
+#                 break
+#             coords = list(map(int, line.split(',')))
+#             start_pos = [(coords[i], coords[i+1]) for i in range(0, len(coords), 2)]
+            
+#             # Read G marker
+#             assert file.readline().strip() == 'G', "Expected 'G' marker"
+            
+#             # Read goal positions
+#             line = file.readline().strip()
+#             coords = list(map(int, line.split(',')))
+#             goal_pos = [(coords[i], coords[i+1]) for i in range(0, len(coords), 2)]
+            
+#             positions.append((start_pos, goal_pos))
+            
+#             # Read next S marker or EOF
+#             line = file.readline()
+#             if not line or line.strip() != 'S':
+#                 break
+        
+#         costmap = np.asarray(costmap)
+    
+#     return x_size, y_size, costmap, positions
 def parse_mapfile(filename):
     with open(filename, 'r') as file:
-        # Read map size and costmap
+        # Ensure the file starts with the 'N' marker
         assert file.readline().strip() == 'N', "Expected 'N' in the first line"
-        x_size, y_size = map(int, file.readline().strip().split(','))
         
+        # Read the dimensions of the map
+        x_size, y_size = map(int, file.readline().strip().split(','))
+
+        # Read the 'S' marker for start positions
+        assert file.readline().strip() == 'S', "Expected 'S' marker"
+
+        # Parse start positions
+        start_line = file.readline().strip()
+        start_coords = list(map(int, start_line.split(',')))
+        start_positions = [(start_coords[i], start_coords[i + 1]) for i in range(0, len(start_coords), 2)]
+
+        # Read the 'G' marker for goal positions
+        assert file.readline().strip() == 'G', "Expected 'G' marker"
+
+        # Parse goal positions
+        goal_line = file.readline().strip()
+        goal_coords = list(map(int, goal_line.split(',')))
+        goal_positions = [(goal_coords[i], goal_coords[i + 1]) for i in range(0, len(goal_coords), 2)]
+
+        # Read until the 'M' marker to start the costmap
+        while True:
+            line = file.readline().strip()
+            if line == 'M':
+                break
+            if not line:
+                raise ValueError("Expected 'M' marker before costmap data")
+
+        # Parse the costmap
         costmap = []
         for line in file:
-            if line.strip() == 'S':
-                break
-            # Split by comma and filter out empty strings
-            values = [x for x in line.strip().split(',') if x]
-            row = list(map(float, values))
-            costmap.append(row)
-        
-        # Read all S and G positions
-        positions = []
-        while True:
-            # Read start positions
-            line = file.readline().strip()
-            if not line:
-                break
-            coords = list(map(int, line.split(',')))
-            start_pos = [(coords[i], coords[i+1]) for i in range(0, len(coords), 2)]
-            
-            # Read G marker
-            assert file.readline().strip() == 'G', "Expected 'G' marker"
-            
-            # Read goal positions
-            line = file.readline().strip()
-            coords = list(map(int, line.split(',')))
-            goal_pos = [(coords[i], coords[i+1]) for i in range(0, len(coords), 2)]
-            
-            positions.append((start_pos, goal_pos))
-            
-            # Read next S marker or EOF
-            line = file.readline()
-            if not line or line.strip() != 'S':
-                break
-        
-        costmap = np.asarray(costmap)
-    
-    return x_size, y_size, costmap, positions
+            line = line.strip()
+            if not line:  # Skip empty lines
+                continue
+            values = list(map(float, line.split(',')))
+            costmap.append(values)
 
+        # Convert costmap to a numpy array
+        costmap = np.asarray(costmap)
+        positions = [(start_positions, goal_positions)]
+
+    return x_size, y_size, costmap, positions
 def update(frame, ax, positions, start_scatter, goal_scatter):
     start_pos, goal_pos = positions[frame]
     
