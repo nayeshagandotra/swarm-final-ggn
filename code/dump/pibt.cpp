@@ -10,20 +10,6 @@ PIBT::~PIBT() {
     std::cout << "PIBT planner destroyed." << std::endl;
 }
 
-// void PIBT::initialize(const std::vector<std::vector<int>>& map, int numAgents) {
-//     map_ = map;
-//     agents_.clear();
-//     for (int i = 0; i < numAgents; ++i) {
-//         Agent agent;
-//         agent.id = i;
-//         agent.position = {0, 0}; // Start at (0, 0) or define dynamically
-//         agent.goal = {map.size() - 1, map[0].size() - 1}; // Example goal
-//         agents_.push_back(agent);
-//         agentMap_[i] = agent;
-//     }
-//     std::cout << "Initialized with " << numAgents << " agents." << std::endl;
-// }
-
 void PIBT::initialize(const std::vector<std::vector<int>>& map, int numAgents) {
     if (map.empty() || map[0].empty()) {
         std::cerr << "Error: Map cannot be empty." << std::endl;

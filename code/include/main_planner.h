@@ -1,19 +1,15 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
-// Declare the plan function
-void planner(
-    int* map,
-    int x_size,
-    int y_size
-    );
+int calculateCentroidIndex(const std::vector<int>& goal_positions, int x_size);
 
-void cost_maker(
+void planner(
     int* map,
     int x_size,
     int y_size,
     int swarm_size,
-    int goal_index
+    std::vector<int> start_positions,
+    std::vector<int> goal_positions
     );
 
 #endif // PLANNER_H

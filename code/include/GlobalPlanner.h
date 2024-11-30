@@ -8,6 +8,8 @@
 #include <cmath>
 #include <algorithm>
 
+#define COLLISION_THRESH 0.5
+
 class GlobalPlanner {
 public:
     // Constructor and destructor
@@ -18,7 +20,6 @@ public:
     void distBWDijkstra(std::shared_ptr<Node> goal);
     void calculateRectSum();
     
-private:
     int swarm_size_;
     NodeMap nodemap_;
     int x_size_;
@@ -32,8 +33,5 @@ private:
 // Helper functions
 int euclidean(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2);
 int manhattan(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2);
-std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Node> start, 
-                                                std::shared_ptr<Node> goal,
-                                                const NodeMap& nodemap);
 
 #endif
