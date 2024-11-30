@@ -14,7 +14,9 @@ def parse_mapfile(filename):
         for line in file:
             if line.strip() == 'S':
                 break
-            row = list(map(float, line.strip().split(',')))
+            # Split by comma and filter out empty strings
+            values = [x for x in line.strip().split(',') if x]
+            row = list(map(float, values))
             costmap.append(row)
         
         # Read all S and G positions

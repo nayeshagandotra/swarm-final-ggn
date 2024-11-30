@@ -13,6 +13,7 @@ void PIBT::refresh_lists(){
     for (auto a : agents){
         occupied_now[a->cpy*global_costplan->x_size_ + a->cpx] = a;   //that index is now occupied 
         undecided.insert(a);
+        occupied_next.clear();
     }
 }
 
