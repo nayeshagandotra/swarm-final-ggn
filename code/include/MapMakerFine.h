@@ -10,9 +10,6 @@
 #include <vector>
 #include <array>
 
-// Macro to calculate 1D index from 2D coordinates
-#define GETMAPINDEX(X, Y, XSIZE, YSIZE) ((Y-1)*XSIZE + (X-1))
-
 struct Node {
     int x = 0;
     int y = 0;

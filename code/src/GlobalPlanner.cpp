@@ -90,7 +90,7 @@ void GlobalPlanner::calculateRectSum() {
     
     for (int y = 0; y < y_size_; y++) {
         for (int x = 0; x < x_size_; x++) {
-            auto current = nodemap_[GETMAPINDEX(x+1, y+1, x_size_, y_size_)];
+            auto current = nodemap_[y*x_size_ + x];
             float sum = 0;
             
             // Calculate bounds for the rectangle
@@ -103,7 +103,7 @@ void GlobalPlanner::calculateRectSum() {
             for (int sy = y_start; sy <= y_end; sy++) {
                 for (int sx = x_start; sx <= x_end; sx++) {
                     if (sx >= 0 && sx < x_size_ && sy >= 0 && sy < y_size_) {
-                        sum += nodemap_[GETMAPINDEX(sx+1, sy+1, x_size_, y_size_)]->mapvalue;
+                        sum += nodemap_[sy*x_size_ + sx]->mapvalue;
                     } else {
                         sum += out_of_bounds_value;
                     }
