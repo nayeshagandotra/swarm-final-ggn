@@ -1,6 +1,6 @@
 // globalplanner.cpp
 #include "../include/GlobalPlanner.h"
-#define COLLISION_THRESH 0.5
+
 
 GlobalPlanner::GlobalPlanner(int num_agents, NodeMap nodemap, 
                            int x_size, int y_size)
@@ -14,8 +14,8 @@ bool GlobalPlanner::isFree(std::shared_ptr<Node> p) const {
 }
 
 int euclidean(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2) {
-    return sqrt((p1->x - p2->x)*(p1->x - p2->x) + 
-                (p1->y - p2->y)*(p1->y - p2->y));
+    return (p1->x - p2->x)*(p1->x - p2->x) + 
+                (p1->y - p2->y)*(p1->y - p2->y);
 }
 
 int manhattan(std::shared_ptr<Node> p1, std::shared_ptr<Node> p2) {
@@ -54,20 +54,6 @@ std::vector<std::shared_ptr<Node>> GlobalPlanner::getSuccessors(std::shared_ptr<
         }
     }
     return successors;
-}
-
-std::vector<std::pair<int, int>> reconstructPath(std::shared_ptr<Node> start, 
-                                                std::shared_ptr<Node> goal) {
-    std::vector<std::pair<int, int>> path;
-    auto current = goal;
-    
-    while (current != start) {
-        path.push_back({current->x, current->y});
-        current = current->parent;  // Direct pointer access
-    }
-    path.push_back({start->x, start->y});
-    std::reverse(path.begin(), path.end());
-    return path;
 }
 
 void GlobalPlanner::distBWDijkstra(std::shared_ptr<Node> goal) {

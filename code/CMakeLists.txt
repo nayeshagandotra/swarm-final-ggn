@@ -25,6 +25,15 @@ add_library(GlobalPlanner
     src/GlobalPlanner.cpp
 )
 
+add_library(PIBT 
+    src/PIBT_final.cpp
+)
+
+set_target_properties(PIBT PROPERTIES
+    COMPILE_FLAGS "-g"
+    DEBUG_POSTFIX "d"
+)
+
 # Convert main_planner to a library
 add_library(main_planner
     src/main_planner.cpp
@@ -38,6 +47,7 @@ target_include_directories(main_planner
 target_link_libraries(main_planner 
     PRIVATE MapMakerFine 
     PRIVATE GlobalPlanner
+    PRIVATE PIBT
 )
 
 # Define paths for main_planner
@@ -64,6 +74,7 @@ target_link_libraries(run_test
     PRIVATE main_planner
     PRIVATE MapMakerFine
     PRIVATE GlobalPlanner
+    PRIVATE PIBT
 )
 
 # Define paths for run_test

@@ -47,6 +47,52 @@ int main(int argc, char *argv[]) {
     myfile >> x_size >> letter >> y_size;
     std::cout << "map size: " << x_size << letter << y_size << std::endl;
 
+    // Read start positions
+    myfile >> letter;
+    if (letter != 'S') {
+        std::cout << "error parsing start positions" << std::endl;
+        return -1;
+    }
+
+    std::vector<int> start_positions;
+    std::getline(myfile, line); // consume the newline
+    std::getline(myfile, line);
+    std::stringstream ss(line);
+    std::string value;
+
+    while (std::getline(ss, value, ',')) {
+        int x = std::stoi(value);
+        std::getline(ss, value, ',');
+        int y = std::stoi(value);
+        start_positions.push_back(y*x_size + x);
+    }
+
+    // Read goal positions
+    myfile >> letter;
+    if (letter != 'G') {
+        std::cout << "error parsing goal positions" << std::endl;
+        return -1;
+    }
+
+    std::vector<int> goal_positions;
+    std::getline(myfile, line); // consume the newline
+    std::getline(myfile, line);
+    std::stringstream ss_goal(line);
+
+    while (std::getline(ss_goal, value, ',')) {
+        int x = std::stoi(value);
+        std::getline(ss_goal, value, ',');
+        int y = std::stoi(value);
+        goal_positions.push_back(y*x_size + x);
+    }
+
+    // Read map
+    myfile >> letter;
+    if (letter != 'M') {
+        std::cout << "error parsing map" << std::endl;
+        return -1;
+    }
+
     // read map - corrected version
     int* map = new int[x_size*y_size];
     std::getline(myfile, line); // consume the newline
@@ -55,23 +101,20 @@ int main(int argc, char *argv[]) {
         std::getline(myfile, line);
         std::stringstream ss(line);
         for (size_t i = 0; i < x_size; i++) {
-            double value;
+            double valued;
             if (i < x_size-1) {
                 std::string val;
                 std::getline(ss, val, ',');
-                value = std::stod(val);
+                valued = std::stod(val);
             } else {
                 ss >> value;
             }
-            map[j*x_size + i] = (int)value;
+            map[j*x_size + i] = (int)valued;
         }
     }
-
-    // set start and goal
-    int goal = GETMAPINDEX(65, 45, x_size, y_size);
     
-    // call cost_maker
-    cost_maker(map, x_size, y_size, swarm_size, goal);
+    // call cost_maker/ planner
+    planner(map, x_size, y_size, swarm_size, start_positions, goal_positions);
     
     myfile.close();
     delete[] map;

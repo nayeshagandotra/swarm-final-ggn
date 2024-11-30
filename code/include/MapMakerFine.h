@@ -20,8 +20,6 @@ struct Node {
     std::array<int, 3> h = {std::numeric_limits<int>::max() - 1,
                            0,
                            0};  // [hd, hobs, hform]
-    std::shared_ptr<Node> parent = nullptr;  // Parent pointer
-    std::shared_ptr<Node> child = nullptr;   // Child pointer
     std::array<bool, 3> closed_dj = {false, false, false};  // Fixed size array of 3 booleans
 };
 

@@ -1,62 +1,83 @@
 #ifndef PIBT_H
 #define PIBT_H
 
-#include "../include/GlobalPlanner.h"
-#include <math.h>
 #include <vector>
-#include <queue>
-#include <chrono>
-#include <iostream>  // For std::cout
-#include <fstream>
-#include <limits>
-#include <thread>
 #include <unordered_map>
-#include "load_map.h"
+#include <unordered_set>
+#include <set>
+#include <queue>
+#include <random>
+#include "../include/GlobalPlanner.h"
+#include "../include/MapMakerFine.h"
 
-class PIBT{
-public:
-    PIBT();
-    ~PIBT();
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_real_distribution<float> dis(0.0f, 1.0f);
 
-
-    void initialize(const std::vector<std::vector<int>>& map, int numAgents);
-
-    bool planPaths(std::vector<std::vector<int>>& agentPaths);
-
-    std::vector<int> getAgentState(int agentID) const;
-
-    void setGoal(int agentID, const std::vector<int>& goal);
-
-    void displayPaths() const;
-
-    static std::string toKey(int x, int y, int t); // Now static
-    
-
-private:
-    struct Agent {
-            int id;
-            std::vector<int> position;
-            std::vector<int> goal;
-            std::vector<std::vector<int>> path;
-        };
-    // Method to plan a path from start to goal
-    std::vector<std::vector<int>> map_; // Grid map for the environment
-    std::vector<Agent> agents_;         // List of agents
-    std::unordered_map<int, Agent> agentMap_; // Map for quick agent lookup
-
-    // Helper methods
-    bool isValidPosition(const std::vector<int>& position) const;
-    double calculateHeuristic(const std::vector<int>& current, const std::vector<int>& goal) const;
-    void updateAgentPath(Agent& agent);
-
-    struct Compare {
-        bool operator()(const std::tuple<std::vector<int>, int, std::vector<std::vector<int>>>& a,
-                        const std::tuple<std::vector<int>, int, std::vector<std::vector<int>>>& b) const {
-            return std::get<1>(a) > std::get<1>(b);
-        }
-    };
-
+struct Agent {
+    int id;
+    int cpx;   //current pos of that agent
+    int cpy;
+    int gpx;
+    int gpy;      //this is the goal node for that agent
+    int priority;
+    float random_priority;
+    std::vector<std::vector<int>> path;
 };
 
+struct AgentPriorityComparator {
+    bool operator()(const std::shared_ptr<Agent>& a1, const std::shared_ptr<Agent>& a2) const {
+        // First check for same object to maintain consistency
+        if (a1.get() == a2.get()) {
+            return false;
+        }
+        // Compare priorities
+        if (a1->priority != a2->priority) {
+            return a1->priority > a2->priority;
+        }
+        // Use ID as stable tie-breaker
+        return a1->id < a2->id;
+    }
+};
+
+struct Vertex {
+    int idx = 0;
+    std::shared_ptr<Node> n = nullptr;
+    int f = 0;
+};
+
+struct VertexComparator {
+    bool operator()(const std::shared_ptr<Vertex>& v1, const std::shared_ptr<Vertex>& v2) const {
+        return v1->f > v2->f;  // Lower f values have higher priority
+    }
+};
+
+
+class PIBT {
+    public:
+    GlobalPlanner* global_costplan;
+    int x_size_;
+    int y_size_;
+    std::vector<int> start_positions;
+    std::vector<int> goal_positions;
+    std::vector<std::shared_ptr<Agent>> agents;
+    std::unordered_map<int, std::shared_ptr<Agent>> occupied_now;
+    std::unordered_map<int, std::shared_ptr<Agent>> occupied_next;
+    std::set<std::shared_ptr<Agent>, AgentPriorityComparator> undecided;
+
+    PIBT(GlobalPlanner* global_planner, std::vector<int>& start_positions, std::vector<int>& goal_positions);
+    ~PIBT();
+    void refresh_lists();
+    void initialize_pibt();
+    void print_agent_positions(const std::string& filename);
+    int getFormationScore(int vertext_id);
+    std::priority_queue<std::shared_ptr<Vertex>, 
+                   std::vector<std::shared_ptr<Vertex>>, 
+                   VertexComparator> getSuccessors(std::shared_ptr<Agent> p);
+    void plan_one_step();
+    bool funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj = nullptr);
+    bool isComplete();
+    bool runPIBT();
+};
 
 #endif

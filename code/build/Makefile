@@ -156,6 +156,19 @@ GlobalPlanner/fast:
 .PHONY : GlobalPlanner/fast
 
 #=============================================================================
+# Target rules for targets named PIBT
+
+# Build rule for target.
+PIBT: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 PIBT
+.PHONY : PIBT
+
+# fast build rule for target.
+PIBT/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PIBT.dir/build.make CMakeFiles/PIBT.dir/build
+.PHONY : PIBT/fast
+
+#=============================================================================
 # Target rules for targets named main_planner
 
 # Build rule for target.
@@ -228,6 +241,30 @@ src/MapMakerFine.s: src/MapMakerFine.cpp.s
 src/MapMakerFine.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapMakerFine.dir/build.make CMakeFiles/MapMakerFine.dir/src/MapMakerFine.cpp.s
 .PHONY : src/MapMakerFine.cpp.s
+
+src/PIBT_final.o: src/PIBT_final.cpp.o
+.PHONY : src/PIBT_final.o
+
+# target to build an object file
+src/PIBT_final.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PIBT.dir/build.make CMakeFiles/PIBT.dir/src/PIBT_final.cpp.o
+.PHONY : src/PIBT_final.cpp.o
+
+src/PIBT_final.i: src/PIBT_final.cpp.i
+.PHONY : src/PIBT_final.i
+
+# target to preprocess a source file
+src/PIBT_final.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PIBT.dir/build.make CMakeFiles/PIBT.dir/src/PIBT_final.cpp.i
+.PHONY : src/PIBT_final.cpp.i
+
+src/PIBT_final.s: src/PIBT_final.cpp.s
+.PHONY : src/PIBT_final.s
+
+# target to generate assembly for a file
+src/PIBT_final.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/PIBT.dir/build.make CMakeFiles/PIBT.dir/src/PIBT_final.cpp.s
+.PHONY : src/PIBT_final.cpp.s
 
 src/load_map.o: src/load_map.cpp.o
 .PHONY : src/load_map.o
@@ -311,6 +348,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... GlobalPlanner"
 	@echo "... MapMakerFine"
+	@echo "... PIBT"
 	@echo "... load_map"
 	@echo "... main_planner"
 	@echo "... run_test"
@@ -320,6 +358,9 @@ help:
 	@echo "... src/MapMakerFine.o"
 	@echo "... src/MapMakerFine.i"
 	@echo "... src/MapMakerFine.s"
+	@echo "... src/PIBT_final.o"
+	@echo "... src/PIBT_final.i"
+	@echo "... src/PIBT_final.s"
 	@echo "... src/load_map.o"
 	@echo "... src/load_map.i"
 	@echo "... src/load_map.s"
