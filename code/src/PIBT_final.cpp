@@ -111,15 +111,18 @@ std::priority_queue<std::shared_ptr<Vertex>,
                 auto vertex = std::make_shared<Vertex>();
                 vertex->idx = newY * x_size_ + newX;
                 vertex->n = node;
-                
+
+                float manhattan = abs(newX - p->gpx) + abs(newY - p->gpy);
+          
                 float w2 = 0.0;
                 float w3 = 0.0;
-                float w4 = std::max(0, global_costplan->swarm_size_ - std::max(abs(newX - p->gpx), abs(newY - p->gpy)));
+                float w4 = (manhattan < global_costplan->swarm_size_) ? manhattan : 0.0;
                 float w1 = (w4 == 0) ? 1.0 : 0.0;
 
                 vertex->f = w1 * node->h[0] + 
                            w2 * node->h[1] + 
-                           w3 * getFormationScore(vertex->idx);
+                           w3 * getFormationScore(vertex->idx)+ 
+                           w4;
                 
                 successors.push(vertex);
             }
@@ -178,6 +181,7 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
                 ai->cpy = vi_star->idx / x_size_;
                 ai->path.push_back({ai->cpx, ai->cpy});  // Record path
                 ai->priority = std::max(abs(ai->cpx - ai->gpx), abs(ai->cpy - ai->gpy));
+                ai->random_priority = dis(gen) * ai->priority;
                 return true;
             } else {
                 // Put back in occupied_now since move failed
@@ -199,18 +203,18 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
     // If no valid move found, stay in place
     occupied_next[ai->cpy * x_size_ + ai->cpx] = ai;
     ai->path.push_back({ai->cpx, ai->cpy});  // Record staying in place
-    ai->priority += 5; //increase priority so this doesn't get stuck always
+    ai->priority += 15; //increase priority so this doesn't get stuck always
     ai->random_priority = dis(gen) * ai->priority;
     return false;
 }
 
 bool PIBT::isComplete() {
     for (const auto& agent : agents) {
-        if (agent->cpx != agent->gpx || agent->cpy != agent->gpy) {
-            return false;
+        if (agent->cpx == agent->gpx && agent->cpy == agent->gpy) {
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 bool PIBT::runPIBT(){
@@ -221,9 +225,9 @@ bool PIBT::runPIBT(){
     while (!isComplete()){
 
         auto current_time = std::chrono::steady_clock::now();
-        if (current_time - start_time > timeout_duration) {
-            return false;  // Timeout reached
-        }
+        // if (current_time - start_time > timeout_duration) {
+        //     return false;  // Timeout reached
+        // }
         print_agent_positions("node_map_costs.txt");
         plan_one_step(); 
     }
