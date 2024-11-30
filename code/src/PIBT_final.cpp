@@ -112,10 +112,11 @@ std::priority_queue<std::shared_ptr<Vertex>,
                 vertex->idx = newY * x_size_ + newX;
                 vertex->n = node;
                 
-                float w1 = 1.0;
                 float w2 = 0.0;
                 float w3 = 0.0;
-                
+                float w4 = std::max(0, global_costplan->swarm_size_ - std::max(abs(newX - p->gpx), abs(newY - p->gpy)));
+                float w1 = (w4 == 0) ? 1.0 : 0.0;
+
                 vertex->f = w1 * node->h[0] + 
                            w2 * node->h[1] + 
                            w3 * getFormationScore(vertex->idx);
@@ -176,6 +177,7 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
                 ai->cpx = vi_star->idx % x_size_;
                 ai->cpy = vi_star->idx / x_size_;
                 ai->path.push_back({ai->cpx, ai->cpy});  // Record path
+                ai->priority = std::max(abs(ai->cpx - ai->gpx), abs(ai->cpy - ai->gpy));
                 return true;
             } else {
                 // Put back in occupied_now since move failed
@@ -190,14 +192,15 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
             ai->cpx = vi_star->idx % x_size_;
             ai->cpy = vi_star->idx / x_size_;
             ai->path.push_back({ai->cpx, ai->cpy});  // Record path
-            ai->priority = 0;
+            ai->priority = std::max(abs(ai->cpx - ai->gpx), abs(ai->cpy - ai->gpy));
             return true;
         }
     }
     // If no valid move found, stay in place
     occupied_next[ai->cpy * x_size_ + ai->cpx] = ai;
     ai->path.push_back({ai->cpx, ai->cpy});  // Record staying in place
-    ai->priority += 1; //increase priority so this doesn't get stuck always
+    ai->priority += 5; //increase priority so this doesn't get stuck always
+    ai->random_priority = dis(gen) * ai->priority;
     return false;
 }
 

@@ -12,7 +12,7 @@
 
 static std::random_device rd;
 static std::mt19937 gen(rd());
-static std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+static std::uniform_real_distribution<float> dis(0.0f, 10.0f);
 
 struct Agent {
     int id;
@@ -36,7 +36,7 @@ struct AgentPriorityComparator {
             return a1->priority > a2->priority;
         }
         // Use ID as stable tie-breaker
-        return a1->id < a2->id;
+        return a1->random_priority < a2->random_priority;
     }
 };
 
