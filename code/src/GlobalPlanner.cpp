@@ -110,7 +110,7 @@ void GlobalPlanner::calculateRectSum() {
                 }
             }
             
-            current->h[1] = sum;
+            current->h[1] = sum/(rect_width*rect_height);
         }
     }
 }

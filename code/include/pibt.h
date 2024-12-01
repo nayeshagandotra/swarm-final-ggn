@@ -58,6 +58,7 @@ class PIBT {
     GlobalPlanner* global_costplan;
     int x_size_;
     int y_size_;
+    float distance_thresh = 10.0;
     std::vector<int> start_positions;
     std::vector<int> goal_positions;
     std::vector<std::shared_ptr<Agent>> agents;

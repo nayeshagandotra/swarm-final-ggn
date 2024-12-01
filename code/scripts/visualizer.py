@@ -62,7 +62,7 @@ def update(frame, ax, positions, start_scatter, goal_scatter):
 
 def save_animation(filename, positions, x_size, y_size, costmap):
     boundaries = np.arange(0, 70, 1.0)
-    colors = plt.cm.plasma(np.linspace(0, 70, len(boundaries) - 1))
+    colors = plt.cm.plasma(np.linspace(0, 1, len(boundaries) - 1))
     cmap = mcolors.ListedColormap(colors)
     norm = mcolors.BoundaryNorm(boundaries, cmap.N, clip=True)
     
@@ -74,7 +74,7 @@ def save_animation(filename, positions, x_size, y_size, costmap):
     
     anim = FuncAnimation(fig, update, frames=len(positions), 
                         fargs=(ax, positions, start_scatter, goal_scatter), 
-                        interval=1, blit=True)
+                        interval=200, blit=True)
     anim.save(filename, writer='pillow')
     plt.close(fig)
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     x_size, y_size, costmap, positions = parse_mapfile(sys.argv[1])
 
     # Define boundaries and colormap
-    boundaries = np.arange(0, 70, 1.0)
+    boundaries = np.arange(0, 1, 0.1)
     colors = plt.cm.plasma(np.linspace(0, 1, len(boundaries) - 1))
     cmap = mcolors.ListedColormap(colors)
     norm = mcolors.BoundaryNorm(boundaries, cmap.N, clip=True)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     
     # Initialize scatter plots for start and goal positions
     start_scatter = ax.scatter([], [], c='g', marker='o', s=100, label='Start')
-    goal_scatter = ax.scatter([], [], c='r', marker='o', s=100, label='Goal')
+    goal_scatter = ax.scatter([], [], c='r', marker='o', s=2, label='Goal')
     
     # Add colorbar and legend
     cbar = fig.colorbar(cax, ax=ax, ticks=[boundaries[0], boundaries[-1]])

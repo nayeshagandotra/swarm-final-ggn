@@ -1,4 +1,4 @@
-#include "PIBT.h"
+#include "pibt.h"
 #include <algorithm>
 #include <limits>
 
@@ -112,12 +112,12 @@ std::priority_queue<std::shared_ptr<Vertex>,
                 vertex->idx = newY * x_size_ + newX;
                 vertex->n = node;
 
-                float manhattan = abs(newX - p->gpx) + abs(newY - p->gpy);
+                float manhattan = abs(p->cpx - p->gpx) + abs(p->cpy - p->gpy);
           
                 float w2 = 0.0;
                 float w3 = 0.0;
-                float w4 = (manhattan < global_costplan->swarm_size_) ? manhattan : 0.0;
-                float w1 = (w4 == 0) ? 1.0 : 0.0;
+                float w4 = (manhattan <= distance_thresh) ? abs(newX - p->gpx) + abs(newY - p->gpy) : -1.0;
+                float w1 = (w4 != -1.0) ? 0.0 : 1.0;
 
                 vertex->f = w1 * node->h[0] + 
                            w2 * node->h[1] + 
@@ -209,27 +209,29 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
 }
 
 bool PIBT::isComplete() {
+    bool all_agents = true;
     for (const auto& agent : agents) {
-        if (agent->cpx == agent->gpx && agent->cpy == agent->gpy) {
-            return true;
+        all_agents = all_agents && (agent->cpx == agent->gpx && agent->cpy == agent->gpy);
+        if (!all_agents){
+            return false;
         }
     }
-    return false;
+    return all_agents;
 }
 
 bool PIBT::runPIBT(){
     // give it a timeout
     auto start_time = std::chrono::steady_clock::now();
     const auto timeout_duration = std::chrono::seconds(10);  // 60 second timeout
-
+    print_agent_positions("node_map_costs.txt");
     while (!isComplete()){
 
         auto current_time = std::chrono::steady_clock::now();
         // if (current_time - start_time > timeout_duration) {
         //     return false;  // Timeout reached
         // }
-        print_agent_positions("node_map_costs.txt");
         plan_one_step(); 
+        print_agent_positions("node_map_costs.txt");
     }
     return true;  // Successfully completed
 

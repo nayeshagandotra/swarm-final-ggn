@@ -77,7 +77,7 @@ void planner(
     planner.calculateRectSum();
 
     // print nodemap (distance only, change to loop through)
-    print_node_map(nodemap, x_size, y_size, "node_map_costs.txt", "h", 0);
+    print_node_map(nodemap, x_size, y_size, "node_map_costs.txt", "h", 1);
 
     // run pibt
     bool success = pibt.runPIBT();
