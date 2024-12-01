@@ -14,7 +14,7 @@ struct Node {
     int x = 0;
     int y = 0;
     int mapvalue = 0;
-    std::array<int, 3> h = {std::numeric_limits<int>::max() - 1,
+    std::array<float, 3> h = {std::numeric_limits<float>::max() - 1,
                            0,
                            0};  // [hd, hobs, hform]
     std::array<bool, 3> closed_dj = {false, false, false};  // Fixed size array of 3 booleans

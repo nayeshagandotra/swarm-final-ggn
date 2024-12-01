@@ -72,7 +72,7 @@ void GlobalPlanner::distBWDijkstra(std::shared_ptr<Node> goal) {
 
         for (const auto& successor : getSuccessors(current)) {
             if (isFree(successor) && !successor->closed_dj[0]) {
-                int new_g = current->h[0] + 1;    //assume cost = 1 for each movement
+                float new_g = current->h[0] + 1;    //assume cost = 1 for each movement
                 if (successor->h[0] > new_g) {
                     successor->h[0] = new_g;
                     open.push(successor);

@@ -115,7 +115,7 @@ std::priority_queue<std::shared_ptr<Vertex>,
                 float manhattan = abs(p->cpx - p->gpx) + abs(p->cpy - p->gpy);
           
                 float w2 = 0.0;
-                float w3 = 0.0;
+                float w3 = 0.4;
                 float w4 = (manhattan <= distance_thresh) ? abs(newX - p->gpx) + abs(newY - p->gpy) : -1.0;
                 float w1 = (w4 != -1.0) ? 0.0 : 1.0;
 
