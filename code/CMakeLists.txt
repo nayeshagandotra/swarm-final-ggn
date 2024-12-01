@@ -12,7 +12,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 include_directories(include)
 
 # Add libraries
-# Add libraries
 add_library(load_map 
     src/load_map.cpp
 )

@@ -71,7 +71,7 @@ class PIBT {
     void refresh_lists();
     void initialize_pibt();
     void print_agent_positions(const std::string& filename);
-    int getFormationScore(int vertext_id);
+    double getFormationScore(std::shared_ptr<Agent> p,std::shared_ptr<Vertex> vertex);
     std::priority_queue<std::shared_ptr<Vertex>, 
                    std::vector<std::shared_ptr<Vertex>>, 
                    VertexComparator> getSuccessors(std::shared_ptr<Agent> p);
