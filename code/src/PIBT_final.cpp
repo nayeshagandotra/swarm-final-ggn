@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <limits>
 #include "../include/eigen/Eigen/Dense"
+#include <chrono>
 
 PIBT::PIBT(GlobalPlanner* global_planner, std::vector<int>& start_positions, std::vector<int>& goal_positions) : global_costplan(global_planner), start_positions(start_positions), goal_positions(goal_positions) {};
 
@@ -43,7 +44,7 @@ void PIBT::initialize_pibt() {
 
 
 void PIBT::print_agent_positions(const std::string& filename) {
-    std::string output_dir = "code/output/";
+    std::string output_dir = "/home/golin/16782/final_project/swarm-final-ggn/code/output/";
     std::string full_filename = output_dir + filename;
     
     std::ofstream outFile(full_filename, std::ios::app);  // Open in append mode
@@ -99,6 +100,7 @@ double computeRMSE(const Eigen::MatrixXd& P_transformed, const Eigen::MatrixXd& 
 }
 
 double PIBT::getFormationScore(std::shared_ptr<Agent> p,std::shared_ptr<Vertex> vertex){
+    std::pair<int,int> curDir = {vertex->n->x - p->cpx,vertex->n->y - p->cpy};
     // Create a 2xN matrix
     int swarm_size = global_costplan->swarm_size_;
     Eigen::MatrixXd currentPositions(2, swarm_size);
@@ -120,8 +122,8 @@ double PIBT::getFormationScore(std::shared_ptr<Agent> p,std::shared_ptr<Vertex> 
             i++;
             continue;
         }
-        currentPositions(0, i) = agent.second->cpx; // x-coordinate
-        currentPositions(1, i) = agent.second->cpy; // y-coordinate
+        currentPositions(0, i) = agent.second->cpx+curDir.first; // x-coordinate
+        currentPositions(1, i) = agent.second->cpy+curDir.second; // y-coordinate
         goalPositions(0, i) = agent.second->gpx; // x-coordinate
         goalPositions(1, i) = agent.second->gpy; // y-coordinate
         i++;
@@ -161,14 +163,9 @@ double PIBT::getFormationScore(std::shared_ptr<Agent> p,std::shared_ptr<Vertex> 
 
 
 
-
-
-std::priority_queue<std::shared_ptr<Vertex>, 
-        std::vector<std::shared_ptr<Vertex>>, 
-        VertexComparator> PIBT::getSuccessors(std::shared_ptr<Agent> p) {
-    std::priority_queue<std::shared_ptr<Vertex>, 
-                       std::vector<std::shared_ptr<Vertex>>, 
-                       VertexComparator> successors;
+std::priority_queue<std::shared_ptr<Vertex>, std::vector<std::shared_ptr<Vertex>>, VertexComparator> PIBT::getSuccessors(std::shared_ptr<Agent> p)
+ {
+    std::priority_queue<std::shared_ptr<Vertex>, std::vector<std::shared_ptr<Vertex>>, VertexComparator> successors;
 
     for (const auto& dir : directions) {
         int newX = p->cpx + dir.first;
@@ -181,13 +178,15 @@ std::priority_queue<std::shared_ptr<Vertex>,
                 vertex->idx = newY * x_size_ + newX;
                 vertex->n = node;
 
+
                 float manhattan = abs(p->cpx - p->gpx) + abs(p->cpy - p->gpy);
           
-                float w2 = 1.2;
-                float w3 = 5;
+                float w2 = 0;
+                //float w3 = (dir == std::pair<int, int>{0, 0}) ? 20.0 : 5.0;
+                float w3 = 5.0;
                 float w4 = (manhattan <= distance_thresh) ? abs(newX - p->gpx) + abs(newY - p->gpy) : -1.0;
                 float w1 = (w4 != -1.0) ? 0.0 : 1.0;
-
+                
                 vertex->f = w1 * node->h[0] + 
                            w2 * node->h[1] + 
                            w3 * getFormationScore(p, vertex) + 
@@ -296,9 +295,9 @@ bool PIBT::runPIBT(){
     while (!isComplete()){
 
         auto current_time = std::chrono::steady_clock::now();
-        // if (current_time - start_time > timeout_duration) {
-        //     return false;  // Timeout reached
-        // }
+        if (current_time - start_time > timeout_duration) {
+             return false;  // Timeout reached
+        }
         plan_one_step(); 
         print_agent_positions("node_map_costs.txt");
     }
