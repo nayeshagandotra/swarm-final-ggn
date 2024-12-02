@@ -27,15 +27,11 @@ struct Agent {
 
 struct AgentPriorityComparator {
     bool operator()(const std::shared_ptr<Agent>& a1, const std::shared_ptr<Agent>& a2) const {
-        // First check for same object to maintain consistency
-        if (a1.get() == a2.get()) {
-            return false;
-        }
         // Compare priorities
         if (a1->priority != a2->priority) {
             return a1->priority > a2->priority;
         }
-        // Use ID as stable tie-breaker
+        // Use random_priority as tie-breaker
         return a1->random_priority < a2->random_priority;
     }
 };
@@ -75,6 +71,7 @@ class PIBT {
     std::priority_queue<std::shared_ptr<Vertex>, 
                    std::vector<std::shared_ptr<Vertex>>, 
                    VertexComparator> getSuccessors(std::shared_ptr<Agent> p);
+    void update_agent_priority(std::shared_ptr<Agent> ai);
     void plan_one_step();
     bool funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj = nullptr);
     bool isComplete();

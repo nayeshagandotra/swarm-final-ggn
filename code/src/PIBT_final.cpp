@@ -15,7 +15,10 @@ void PIBT::refresh_lists(){
     for (auto a : agents){
         occupied_now[a->cpy*global_costplan->x_size_ + a->cpx] = a;   //that index is now occupied 
         undecided.insert(a);
-        occupied_next.clear();
+    }
+    occupied_next.clear();
+    for (auto a : agents){
+        update_agent_priority(a);
     }
 }
 
@@ -44,7 +47,7 @@ void PIBT::initialize_pibt() {
 
 
 void PIBT::print_agent_positions(const std::string& filename) {
-    std::string output_dir = "/home/golin/16782/final_project/swarm-final-ggn/code/output/";
+    std::string output_dir = "code/output/";
     std::string full_filename = output_dir + filename;
     
     std::ofstream outFile(full_filename, std::ios::app);  // Open in append mode
@@ -182,8 +185,8 @@ std::priority_queue<std::shared_ptr<Vertex>, std::vector<std::shared_ptr<Vertex>
                 float manhattan = abs(p->cpx - p->gpx) + abs(p->cpy - p->gpy);
           
                 float w2 = 0;
-                //float w3 = (dir == std::pair<int, int>{0, 0}) ? 20.0 : 5.0;
-                float w3 = 5.0;
+                // float w3 = (dir == std::pair<int, int>{0, 0}) ? 20.0 : 5.0;
+                float w3 = 10.0;
                 float w4 = (manhattan <= distance_thresh) ? abs(newX - p->gpx) + abs(newY - p->gpy) : -1.0;
                 float w1 = (w4 != -1.0) ? 0.0 : 1.0;
                 
@@ -199,6 +202,10 @@ std::priority_queue<std::shared_ptr<Vertex>, std::vector<std::shared_ptr<Vertex>
     return successors;
 }
 
+void PIBT::update_agent_priority(std::shared_ptr<Agent> ai){
+    ai->priority = std::max(abs(ai->cpx - ai->gpx), abs(ai->cpy - ai->gpy));
+}
+
 void PIBT::plan_one_step(){
     // initializes the undecided pq with all agents (priority will be updated when?????)
     refresh_lists();
@@ -212,7 +219,14 @@ void PIBT::plan_one_step(){
 
 bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
     // this is the main PIBT function as described in the paper. To be called recursively as required.
-    undecided.erase(ai);
+    auto it = std::find_if(undecided.begin(), undecided.end(),
+    [ai](const std::shared_ptr<Agent>& a) {
+        return ai->priority == a->priority && 
+               ai->random_priority == a->random_priority;
+    });
+    if (it != undecided.end()) {
+        undecided.erase(it);
+    }
     // get candidate next vertices
     auto C = getSuccessors(ai);  
 
@@ -248,7 +262,6 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
                 ai->cpx = vi_star->idx % x_size_;
                 ai->cpy = vi_star->idx / x_size_;
                 ai->path.push_back({ai->cpx, ai->cpy});  // Record path
-                ai->priority = std::max(abs(ai->cpx - ai->gpx), abs(ai->cpy - ai->gpy));
                 ai->random_priority = dis(gen) * ai->priority;
                 return true;
             } else {
@@ -256,7 +269,7 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
                 occupied_now[ai->cpy * x_size_ + ai->cpx] = ai;
                 // Remove from occupied_next and continue to next vertex
                 occupied_next.erase(vi_star->idx);
-                undecided.insert(ak);
+                // undecided.insert(ak);
                 continue;
             }
         } else {
@@ -264,14 +277,13 @@ bool PIBT::funcPIBT(std::shared_ptr<Agent> ai, std::shared_ptr<Agent> aj){
             ai->cpx = vi_star->idx % x_size_;
             ai->cpy = vi_star->idx / x_size_;
             ai->path.push_back({ai->cpx, ai->cpy});  // Record path
-            ai->priority = std::max(abs(ai->cpx - ai->gpx), abs(ai->cpy - ai->gpy));
             return true;
         }
     }
     // If no valid move found, stay in place
     occupied_next[ai->cpy * x_size_ + ai->cpx] = ai;
     ai->path.push_back({ai->cpx, ai->cpy});  // Record staying in place
-    ai->priority += 15; //increase priority so this doesn't get stuck always
+    // ai->priority += 15; //increase priority so this doesn't get stuck always
     ai->random_priority = dis(gen) * ai->priority;
     return false;
 }

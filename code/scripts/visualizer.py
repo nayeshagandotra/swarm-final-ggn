@@ -98,7 +98,7 @@ if __name__ == "__main__":
     cax = ax.imshow(costmap, cmap=cmap, norm=norm)
     
     # Initialize scatter plots for start and goal positions
-    start_scatter = ax.scatter([], [], c='g', marker='o', s=100, label='Start')
+    start_scatter = ax.scatter([], [], c='g', marker='o', s=5, label='Start')
     goal_scatter = ax.scatter([], [], c='r', marker='o', s=2, label='Goal')
     
     # Add colorbar and legend
