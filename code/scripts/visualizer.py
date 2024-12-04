@@ -86,7 +86,7 @@ if __name__ == "__main__":
     x_size, y_size, costmap, positions = parse_mapfile(sys.argv[1])
 
     # Define boundaries and colormap
-    boundaries = np.arange(0, 1, 0.1)
+    boundaries = np.arange(0, 70, 1.1)
     colors = plt.cm.plasma(np.linspace(0, 1, len(boundaries) - 1))
     cmap = mcolors.ListedColormap(colors)
     norm = mcolors.BoundaryNorm(boundaries, cmap.N, clip=True)
@@ -110,8 +110,8 @@ if __name__ == "__main__":
     anim = FuncAnimation(
         fig, update, frames=len(positions),
         fargs=(ax, positions, start_scatter, goal_scatter),
-        interval=200, blit=True
+        interval=100, blit=True
     )
     
     plt.show()
-    # save_animation('output_animation.gif', positions, x_size, y_size, costmap)
+    save_animation('output_animation.gif', positions, x_size, y_size, costmap)

@@ -14,7 +14,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/code/build/run_test", // Path to your executable
-            "args": ["${workspaceFolder}/code/maps/fine_map4.txt", "5"],
+            "args": ["${workspaceFolder}/code/maps/fine_map2.txt", "5"],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build", // Optional: If you want to build before debugging
         },]

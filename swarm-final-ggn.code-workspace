@@ -72,7 +72,8 @@
             "utility": "cpp",
             "vector": "cpp",
             "random": "cpp",
-            "set": "cpp"
+            "set": "cpp",
+            "dense": "cpp"
         }
     }
 }
