@@ -73,7 +73,13 @@
             "vector": "cpp",
             "random": "cpp",
             "set": "cpp",
-            "dense": "cpp"
+            "dense": "cpp",
+            "__tree": "cpp",
+            "condition_variable": "cpp",
+            "list": "cpp",
+            "map": "cpp",
+            "numeric": "cpp",
+            "unordered_set": "cpp"
         }
     }
 }

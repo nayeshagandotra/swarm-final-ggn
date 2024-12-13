@@ -11,8 +11,7 @@ PIBT::~PIBT() {
     std::cout << "PIBT planner destroyed." << std::endl;
 }
 
-void PIBT::
-refresh_lists(){
+void PIBT::refresh_lists(){
     bool fform = false;
     for (auto a : agents){
         occupied_now[a->cpy*global_costplan->x_size_ + a->cpx] = a;   //that index is now occupied
@@ -360,7 +359,7 @@ std::priority_queue<std::shared_ptr<Vertex>, std::vector<std::shared_ptr<Vertex>
 }
 
 void PIBT::update_agent_priority(std::shared_ptr<Agent> ai){
-    // ai->priority = abs(ai->cpx - ai->gpx) + abs(ai->cpy - ai->gpy);
+    // ai->priority = abs(ai->cpx - ai->gpx) + abs(ai->cpy - ai->gpy)  ;  
     ai->priority = global_costplan->nodemap_[ai->cpy*x_size_ + ai->cpx]->h[0] - 10*ai->afs;
 }
 
@@ -369,7 +368,7 @@ void PIBT::update_weights(bool fform){
         w3 = 0.0;
     }
     else{
-        w3 = 10.0;
+        w3 = 12.0;
     }
 }
 
@@ -474,9 +473,9 @@ bool PIBT::runPIBT(){
     while (!isComplete()){
 
         auto current_time = std::chrono::steady_clock::now();
-        // if (current_time - start_time > timeout_duration) {
-        //      return false;  // Timeout reached
-        // }
+        if (current_time - start_time > timeout_duration) {
+             return false;  // Timeout reached
+        }
         plan_one_step(); 
         print_agent_positions("node_map_costs.txt");
     }

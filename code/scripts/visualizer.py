@@ -68,13 +68,13 @@ def save_animation(filename, positions, x_size, y_size, costmap):
     
     fig, ax = plt.subplots()
     ax.imshow(costmap, cmap=cmap, norm=norm)
-    start_scatter = ax.scatter([], [], c='g', marker='o', s=100, label='Start')
-    goal_scatter = ax.scatter([], [], c='r', marker='o', s=100, label='Goal')
+    start_scatter = ax.scatter([], [], c='g', marker='o', s=20, label='Start')
+    goal_scatter = ax.scatter([], [], c='r', marker='o', s=5, label='Goal')
     ax.legend()
     
     anim = FuncAnimation(fig, update, frames=len(positions), 
                         fargs=(ax, positions, start_scatter, goal_scatter), 
-                        interval=200, blit=True)
+                        interval=10, blit=True)
     anim.save(filename, writer='pillow')
     plt.close(fig)
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     x_size, y_size, costmap, positions = parse_mapfile(sys.argv[1])
 
     # Define boundaries and colormap
-    boundaries = np.arange(0, 70, 1.1)
+    boundaries = np.arange(0, 500, 1.1)
     colors = plt.cm.plasma(np.linspace(0, 1, len(boundaries) - 1))
     cmap = mcolors.ListedColormap(colors)
     norm = mcolors.BoundaryNorm(boundaries, cmap.N, clip=True)
